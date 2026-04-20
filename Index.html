@@ -1,1196 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Quality of Hire Scorecard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<title>Quality of Hire Dashboard</title>
 <style>
-:root{
-  --bg:#F4F2ED;--surface:#FFF;--surface2:#ECEAE3;--border:rgba(0,0,0,.10);
-  --text:#1A1917;--muted:#6B6962;--accent:#2B5BE0;--accent-light:#E8EDFC;
-  --green:#2E7D32;--green-light:#E8F5E9;--amber:#B45309;--amber-light:#FEF3C7;
-  --purple:#5B21B6;--purple-light:#EDE9FE;--red:#B91C1C;--red-light:#FEE2E2;
-  --blue1:#1E4FA8;--blue1-light:#DBEAFE;--teal:#0F766E;--teal-light:#CCFBF1;
-  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--radius:10px;--radius-sm:6px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
-a{color:inherit;text-decoration:none;}
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f6f7fb;
+        color: #222;
+    }
 
-/* SHELL */
-.shell{display:flex;min-height:100vh;}
+    header {
+        background: #1f2937;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
 
-/* SIDEBAR */
-.sidebar{width:250px;flex-shrink:0;background:#1A1917;color:#E8E6E1;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
-.sb-logo{padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
-.sb-logo h1{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;line-height:1.3;}
-.sb-logo p{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;font-family:var(--mono);}
-.sb-sec{padding:14px 18px 6px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);}
-.sb-link{display:flex;align-items:center;gap:9px;padding:8px 18px;font-size:12px;color:rgba(255,255,255,.6);border-left:2px solid transparent;cursor:pointer;transition:all .12s;}
-.sb-link:hover{background:rgba(255,255,255,.06);color:#fff;}
-.sb-link.active{background:rgba(43,91,224,.28);color:#fff;border-left-color:var(--accent);}
-.sb-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
-.sb-name{flex:1;line-height:1.2;}
-.sb-name small{display:block;font-size:10px;color:rgba(255,255,255,.3);margin-top:1px;}
-.sb-hp{font-size:9px;background:rgba(91,33,182,.5);color:#C4B5FD;padding:1px 5px;border-radius:3px;font-weight:600;}
-.sb-foot{margin-top:auto;padding:14px 18px;font-size:10px;color:rgba(255,255,255,.18);border-top:1px solid rgba(255,255,255,.06);font-family:var(--mono);}
+    .container {
+        max-width: 1100px;
+        margin: 20px auto;
+        padding: 0 20px;
+    }
 
-/* MAIN */
-.main{flex:1;min-width:0;}
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
 
-/* VIEWS */
-.view{display:none;padding:30px 34px;animation:fadein .18s ease;}
-.view.active{display:block;}
-@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        text-align: center;
+    }
 
-/* BREADCRUMB */
-.breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:12px;color:var(--muted);}
-.breadcrumb a,.breadcrumb span{cursor:pointer;}
-.breadcrumb a:hover{color:var(--accent);text-decoration:underline;}
-.breadcrumb .sep{color:var(--border);}
-.breadcrumb .current{color:var(--text);font-weight:500;}
+    .card h3 {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+    }
 
-/* PAGE HEADER */
-.page-hd{margin-bottom:24px;}
-.page-hd h2{font-size:22px;font-weight:600;}
-.page-hd p{font-size:13px;color:var(--muted);margin-top:3px;}
+    .card p {
+        font-size: 22px;
+        margin: 8px 0 0;
+        font-weight: bold;
+    }
 
-/* KPI STRIP */
-.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
-.kpi{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:box-shadow .12s,transform .12s;}
-.kpi:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px);}
-.kpi-label{font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
-.kpi-val{font-size:26px;font-weight:600;line-height:1;}
-.kpi-delta{font-size:11px;margin-top:5px;}
-.kpi-hint{font-size:10px;color:var(--accent);margin-top:4px;font-family:var(--mono);}
-.up{color:var(--green);} .dn{color:var(--red);}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
 
-/* CARDS */
-.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
-.card-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
 
-/* BARS */
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.bar-lbl{font-size:11px;color:var(--muted);min-width:120px;text-align:right;}
-.bar-track{flex:1;background:var(--surface2);border-radius:3px;height:16px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;font-size:10px;font-weight:500;color:rgba(0,0,0,.45);font-family:var(--mono);}
-.b-blue{background:#BFDBFE;} .b-teal{background:#99F6E4;} .b-amber{background:#FDE68A;}
-.b-pink{background:#FBCFE8;} .b-purple{background:#DDD6FE;} .b-gray{background:#D1D5DB;}
+    th {
+        background: #f0f2f5;
+    }
 
-/* MILESTONES */
-.ms-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.ms{border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;transition:box-shadow .12s,transform .12s;}
-.ms:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-1px);}
-.ms-lbl{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
-.ms-score{font-size:28px;font-weight:600;line-height:1;margin-bottom:4px;}
-.ms-note{font-size:10px;line-height:1.3;}
-.ms-hint{font-size:10px;margin-top:3px;opacity:.7;}
-.ms-30{background:var(--blue1-light);} .ms-30 .ms-lbl,.ms-30 .ms-note,.ms-30 .ms-score,.ms-30 .ms-hint{color:var(--blue1);}
-.ms-60{background:var(--teal-light);} .ms-60 .ms-lbl,.ms-60 .ms-note,.ms-60 .ms-score,.ms-60 .ms-hint{color:var(--teal);}
-.ms-90{background:var(--amber-light);} .ms-90 .ms-lbl,.ms-90 .ms-note,.ms-90 .ms-score,.ms-90 .ms-hint{color:var(--amber);}
-.ms-1y{background:var(--purple-light);} .ms-1y .ms-lbl,.ms-1y .ms-note,.ms-1y .ms-score,.ms-1y .ms-hint{color:var(--purple);}
+    .tag {
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        background: #e5e7eb;
+        display: inline-block;
+    }
 
-/* RETENTION */
-.ret-grid{display:flex;align-items:flex-end;gap:10px;height:110px;}
-.ret-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.ret-outer{width:100%;background:var(--surface2);border-radius:4px;display:flex;align-items:flex-end;height:72px;}
-.ret-inner{width:100%;border-radius:4px;}
-.ret-val{font-size:11px;font-weight:600;font-family:var(--mono);}
-.ret-lbl{font-size:10px;color:var(--muted);}
-
-/* EMPLOYEE TABLE */
-.emp-table{width:100%;border-collapse:collapse;}
-.emp-table th{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:0 12px 10px;text-align:left;border-bottom:1px solid var(--border);}
-.emp-table td{padding:11px 12px;border-bottom:0.5px solid var(--border);vertical-align:middle;}
-.emp-table tr:last-child td{border-bottom:none;}
-.emp-table tr:hover td{background:var(--surface2);}
-.emp-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
-.emp-cell{display:flex;align-items:center;gap:9px;}
-.emp-nm{font-weight:500;font-size:13px;color:var(--accent);cursor:pointer;}
-.emp-nm:hover{text-decoration:underline;}
-.emp-role-sm{font-size:11px;color:var(--muted);}
-.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;}
-.bg{background:var(--green-light);color:var(--green);}
-.ba{background:var(--amber-light);color:var(--amber);}
-.bp{background:var(--purple-light);color:var(--purple);}
-.br{background:var(--red-light);color:var(--red);}
-.bb{background:var(--accent-light);color:var(--accent);}
-.bgr{background:var(--surface2);color:var(--muted);}
-.sp{font-family:var(--mono);font-size:12px;font-weight:500;padding:3px 8px;border-radius:4px;display:inline-block;}
-.s-hi{background:var(--green-light);color:var(--green);}
-.s-md{background:var(--amber-light);color:var(--amber);}
-.s-lo{background:var(--red-light);color:var(--red);}
-.s-na{background:var(--surface2);color:var(--muted);}
-
-/* PROFILE */
-.prof-hd{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;}
-.prof-av{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0;}
-.prof-name{font-size:20px;font-weight:600;margin-bottom:2px;}
-.prof-role{font-size:13px;color:var(--muted);margin-bottom:7px;}
-.badge-row{display:flex;gap:6px;flex-wrap:wrap;}
-
-/* EMP KPI STRIP */
-.emp-kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
-.ekpi{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;cursor:pointer;transition:box-shadow .12s,transform .12s;}
-.ekpi:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-1px);}
-.ekpi-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
-.ekpi-val{font-size:18px;font-weight:600;}
-.ekpi-val.sm{font-size:13px;margin-top:2px;}
-.ekpi-hint{font-size:10px;color:var(--accent);margin-top:2px;font-family:var(--mono);}
-
-/* KV */
-.kv-list{display:flex;flex-direction:column;}
-.kv-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
-.kv-row:last-child{border-bottom:none;}
-.kv-key{color:var(--muted);}
-.kv-val{font-weight:500;text-align:right;}
-
-/* MGR BARS */
-.mgr-bar{margin-bottom:10px;}
-.mgr-hd{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
-.mgr-hd span:last-child{font-weight:500;font-family:var(--mono);}
-.mgr-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
-.mgr-fill{height:100%;border-radius:4px;}
-
-/* TIMELINE */
-.timeline{position:relative;padding-left:22px;}
-.timeline::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:1px;background:var(--border);}
-.tl-item{position:relative;margin-bottom:16px;}
-.tl-dot{position:absolute;left:-17px;top:4px;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);}
-.tl-dot.last{background:var(--accent);border-color:var(--accent);}
-.tl-date{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:1px;}
-.tl-event{font-size:13px;font-weight:500;margin-bottom:1px;}
-.tl-detail{font-size:11px;color:var(--muted);}
-
-/* DETAIL PANELS */
-.detail-box{background:var(--accent-light);border:1px solid rgba(43,91,224,.2);border-radius:var(--radius);padding:18px;margin-bottom:16px;}
-.detail-box h3{font-size:14px;font-weight:600;color:var(--accent);margin-bottom:10px;}
-.detail-box p{font-size:13px;color:#1a3380;line-height:1.6;margin-bottom:8px;}
-.detail-box p:last-child{margin-bottom:0;}
-.detail-box ul{padding-left:16px;font-size:13px;color:#1a3380;line-height:1.8;}
-.detail-close{font-size:11px;color:var(--accent);cursor:pointer;font-family:var(--mono);margin-top:10px;display:inline-block;}
-.detail-close:hover{text-decoration:underline;}
-
-/* INSIGHT CARDS */
-.insight-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px;}
-.insight{background:var(--surface2);border-radius:var(--radius-sm);padding:12px;cursor:pointer;transition:all .12s;border:1px solid transparent;}
-.insight:hover{background:var(--accent-light);border-color:rgba(43,91,224,.2);}
-.insight-icon{font-size:18px;margin-bottom:6px;}
-.insight-title{font-size:12px;font-weight:600;margin-bottom:3px;}
-.insight-desc{font-size:11px;color:var(--muted);line-height:1.4;}
-
-.hint{font-size:10px;color:var(--muted);margin-top:10px;font-family:var(--mono);}
-.click-hint{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:4px;}
-
-@media(max-width:700px){
-  .sidebar{display:none;}
-  .kpi-strip,.emp-kpi-strip,.ms-grid{grid-template-columns:1fr 1fr;}
-  .grid-2{grid-template-columns:1fr;}
-  .view{padding:16px;}
-  .insight-grid{grid-template-columns:1fr 1fr;}
-}
+    .good { background: #d1fae5; color: #065f46; }
+    .bad { background: #fee2e2; color: #991b1b; }
 </style>
 </head>
+
 <body>
-<div class="shell">
 
-<nav class="sidebar" id="sidebar">
-  <div class="sb-logo">
-    <h1>Quality of Hire</h1>
-    <p>Cohort · n=100 · FY2024</p>
-  </div>
-  <div class="sb-sec">Overview</div>
-  <div class="sb-link active" id="nav-cohort" onclick="showView('cohort')">
-    <div class="sb-av" style="background:rgba(255,255,255,.1);font-size:14px;">◈</div>
-    <div class="sb-name">Full Cohort Scorecard<small>100 new hires</small></div>
-  </div>
-  <div class="sb-sec">Employees</div>
-  <div class="sb-link" id="nav-e1" onclick="showEmployee(1)">
-    <div class="sb-av" style="background:#E6F1FB;color:#0C447C;">JM</div>
-    <div class="sb-name">Jordan Mercer<small>Product Designer</small></div>
-    <span class="sb-hp">HP</span>
-  </div>
-  <div class="sb-link" id="nav-e2" onclick="showEmployee(2)">
-    <div class="sb-av" style="background:#E1F5EE;color:#085041;">MH</div>
-    <div class="sb-name">Marcus Holt<small>Data Analyst II</small></div>
-  </div>
-  <div class="sb-link" id="nav-e3" onclick="showEmployee(3)">
-    <div class="sb-av" style="background:#EEEDFE;color:#3C3489;">SV</div>
-    <div class="sb-name">Sofia Vasquez<small>Account Executive</small></div>
-  </div>
-  <div class="sb-link" id="nav-e4" onclick="showEmployee(4)">
-    <div class="sb-av" style="background:#FAEEDA;color:#633806;">TO</div>
-    <div class="sb-name">Taye Osei<small>Software Engineer II</small></div>
-    <span class="sb-hp">HP</span>
-  </div>
-  <div class="sb-link" id="nav-e5" onclick="showEmployee(5)">
-    <div class="sb-av" style="background:#FBEAF0;color:#72243E;">NC</div>
-    <div class="sb-name">Nadia Chen<small>HR Business Partner</small></div>
-    <span class="sb-hp">HP</span>
-  </div>
-  <div class="sb-sec">Interviewers</div>
-  <div class="sb-link" id="nav-i1" onclick="showInterviewer(1)">
-    <div class="sb-av" style="background:#FEF3C7;color:#92400E;">RL</div>
-    <div class="sb-name">Rachel Lim<small>Talent Partner</small></div>
-  </div>
-  <div class="sb-link" id="nav-i2" onclick="showInterviewer(2)">
-    <div class="sb-av" style="background:#DCFCE7;color:#14532D;">DW</div>
-    <div class="sb-name">Devon Walsh<small>Eng. Manager</small></div>
-  </div>
-  <div class="sb-link" id="nav-i3" onclick="showInterviewer(3)">
-    <div class="sb-av" style="background:#FCE7F3;color:#831843;">KP</div>
-    <div class="sb-name">Keiko Park<small>HR Director</small></div>
-  </div>
-  <div class="sb-link" id="nav-i4" onclick="showInterviewer(4)">
-    <div class="sb-av" style="background:#E0F2FE;color:#0C4A6E;">TA</div>
-    <div class="sb-name">Tomás Aguilar<small>Sales Director</small></div>
-  </div>
-  <div class="sb-link" id="nav-i5" onclick="showInterviewer(5)">
-    <div class="sb-av" style="background:#F3E8FF;color:#581C87;">BN</div>
-    <div class="sb-name">Brianna Nash<small>Talent Partner</small></div>
-  </div>
-  <div class="sb-foot">HP = High Performer · scores /5</div>
-</nav>
+<header>
+    <h1>Quality of Hire Dashboard</h1>
+    <p>FY2024 Cohort · 100 New Hires</p>
+</header>
 
-<main class="main">
+<div class="container">
 
-<!-- ══════════════════════════
-     COHORT VIEW
-══════════════════════════ -->
-<div class="view active" id="view-cohort">
-  <div class="page-hd">
-    <h2>Cohort Scorecard</h2>
-    <p>FY2024 · 100 new hires · Click any metric or employee name to drill into detail</p>
-  </div>
+    <div class="grid">
+        <div class="card">
+            <h3>High Performer %</h3>
+            <p>34%</p>
+        </div>
 
-  <!-- KPIs -->
-  <div class="kpi-strip">
-    <div class="kpi" onclick="toggleDetail('d-hp')">
-      <div class="kpi-label">High Performer %</div>
-      <div class="kpi-val">34%</div>
-      <div class="kpi-delta up">↑ 4pp vs 30% target</div>
-      <div class="kpi-hint">▸ click for breakdown</div>
+        <div class="card">
+            <h3>1-Year Retention</h3>
+            <p>82%</p>
+        </div>
+
+        <div class="card">
+            <h3>Time to Productivity</h3>
+            <p>7.6 wks</p>
+        </div>
+
+        <div class="card">
+            <h3>Manager Satisfaction</h3>
+            <p>4.1 / 5</p>
+        </div>
     </div>
-    <div class="kpi" onclick="toggleDetail('d-ret')">
-      <div class="kpi-label">1-Year Retention</div>
-      <div class="kpi-val">82%</div>
-      <div class="kpi-delta dn">↓ 3pp vs 85% benchmark</div>
-      <div class="kpi-hint">▸ click for breakdown</div>
-    </div>
-    <div class="kpi" onclick="toggleDetail('d-ttp')">
-      <div class="kpi-label">Avg Time to Productive</div>
-      <div class="kpi-val">7.6<span style="font-size:14px;font-weight:400;color:var(--muted)"> wks</span></div>
-      <div class="kpi-delta dn">↑ 0.6 wks vs last year</div>
-      <div class="kpi-hint">▸ click for breakdown</div>
-    </div>
-    <div class="kpi" onclick="toggleDetail('d-mgr')">
-      <div class="kpi-label">Mgr Satisfaction</div>
-      <div class="kpi-val">4.1<span style="font-size:14px;font-weight:400;color:var(--muted)">/5</span></div>
-      <div class="kpi-delta up">↑ 0.3 vs last year</div>
-      <div class="kpi-hint">▸ click for breakdown</div>
-    </div>
-  </div>
 
-  <!-- Detail: HP -->
-  <div class="detail-box" id="d-hp" style="display:none;">
-    <h3>📊 High Performer Rate — Deep Dive</h3>
-    <p><strong>34 of 100 new hires</strong> reached high performer status (≥4.5/5 at 1-year review), beating the 30% target by 4 percentage points.</p>
-    <ul>
-      <li><strong>Employee referrals</strong> drove the highest HP rate at <strong>54%</strong> — more than double the agency average</li>
-      <li><strong>Career site</strong> applicants were second at <strong>38%</strong>, outperforming LinkedIn (25%) significantly</li>
-      <li>HP rate correlates strongly with faster time to productivity — HP hires averaged <strong>5.8 weeks</strong> vs 9.1 weeks for non-HP</li>
-      <li>Manager satisfaction scores are <strong>0.8 points higher</strong> on average for HP new hires</li>
-      <li>None of the 34 HP hires have separated; all-cause attrition is entirely in the non-HP population</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-hp')">✕ close</span>
-  </div>
+    <h2>Employee Snapshot</h2>
 
-  <!-- Detail: Retention -->
-  <div class="detail-box" id="d-ret" style="display:none;">
-    <h3>📉 Retention Rate — Deep Dive</h3>
-    <p><strong>82 of 100 hires</strong> were still employed at the 1-year mark. The 18% attrition rate is 3pp above the 15% benchmark.</p>
-    <ul>
-      <li><strong>Q1 (0–90 days):</strong> Only 2 departures. Both were voluntary resignations citing role misalignment — sourced via agency</li>
-      <li><strong>Q2 (90–180 days):</strong> 4 more departures. The 6-month mark is the highest single-risk window historically</li>
-      <li><strong>Q3 (180–270 days):</strong> 5 departures. This cohort's attrition accelerated here — worth investigating manager relationships</li>
-      <li><strong>Q4 (270–365 days):</strong> 7 departures. Voluntary in all cases. Exit surveys cite compensation and growth opportunities</li>
-      <li>All 18 departures were non-HP performers. Zero HP attrition in year 1 — a strong signal for sourcing quality</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-ret')">✕ close</span>
-  </div>
-
-  <!-- Detail: TTP -->
-  <div class="detail-box" id="d-ttp" style="display:none;">
-    <h3>⏱ Time to Productivity — Deep Dive</h3>
-    <p><strong>Average 7.6 weeks</strong> across the cohort to reach a manager-rated ≥4/5 on core role tasks. This is 0.6 weeks slower than FY2023.</p>
-    <ul>
-      <li><strong>Employee referrals:</strong> 5.5 wks — fastest ramp. Prior relationship with culture reduces friction</li>
-      <li><strong>Career site:</strong> 6.5 wks — above average. Self-selected candidates tend to research the role deeply</li>
-      <li><strong>Campus/university:</strong> 7.5 wks — expected for early-career. Strong trajectory post-ramp</li>
-      <li><strong>LinkedIn/job boards:</strong> 8.5 wks — broad applicant pool increases fit variance</li>
-      <li><strong>Agency:</strong> 10 wks — slowest and highest cost. Warrants review of agency briefing quality</li>
-      <li>Ramp time has a <strong>0.74 correlation</strong> with 90-day performance score across the cohort</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-ttp')">✕ close</span>
-  </div>
-
-  <!-- Detail: Manager Satisfaction -->
-  <div class="detail-box" id="d-mgr" style="display:none;">
-    <h3>⭐ Manager Satisfaction — Deep Dive</h3>
-    <p><strong>4.1/5 overall</strong> on the post-90-day manager survey — up from 3.8 last year. Ramp speed remains the weakest dimension.</p>
-    <ul>
-      <li><strong>Skills match (4.3):</strong> Strongest dimension. Hiring bar and job descriptions appear well-calibrated</li>
-      <li><strong>Culture fit (4.4):</strong> Highest rated. Values-based interview additions in Q1 2024 appear to be working</li>
-      <li><strong>Ramp speed (3.7):</strong> Weakest area. Managers cite insufficient pre-boarding materials and delayed system access as primary blockers</li>
-      <li><strong>Overall quality (4.1):</strong> In line with benchmark. Target is 4.3 by end of FY2025</li>
-      <li>Managers who completed structured 30-day check-ins rated new hire ramp speed <strong>0.6 points higher</strong> on average</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-mgr')">✕ close</span>
-  </div>
-
-  <!-- Source charts -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Source of Hire — Volume (n=100)</div>
-      <div class="bar-row"><span class="bar-lbl">Employee referral</span><div class="bar-track"><div class="bar-fill b-blue" style="width:28%">28</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">LinkedIn / job boards</span><div class="bar-track"><div class="bar-fill b-teal" style="width:24%">24</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Agency / recruiter</span><div class="bar-track"><div class="bar-fill b-amber" style="width:18%">18</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Company career site</span><div class="bar-track"><div class="bar-fill b-pink" style="width:16%">16</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">University / campus</span><div class="bar-track"><div class="bar-fill b-purple" style="width:9%">9</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Other / unknown</span><div class="bar-track"><div class="bar-fill b-gray" style="width:5%">5</div></div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">HP% by Source — best performing channels</div>
-      <div class="bar-row"><span class="bar-lbl">Employee referral</span><div class="bar-track"><div class="bar-fill b-blue" style="width:54%">54%</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Company career site</span><div class="bar-track"><div class="bar-fill b-pink" style="width:38%">38%</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">University / campus</span><div class="bar-track"><div class="bar-fill b-purple" style="width:33%">33%</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">LinkedIn / job boards</span><div class="bar-track"><div class="bar-fill b-teal" style="width:25%">25%</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Agency / recruiter</span><div class="bar-track"><div class="bar-fill b-amber" style="width:17%">17%</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Other / unknown</span><div class="bar-track"><div class="bar-fill b-gray" style="width:10%">10%</div></div></div>
-      <p class="hint">HP% = share of that source's hires rated high performer at 1-yr review</p>
-    </div>
-  </div>
-
-  <!-- Milestones -->
-  <div class="card">
-    <div class="card-title">Cohort Avg Performance at Each Milestone — click a tile for detail</div>
-    <div class="ms-grid">
-      <div class="ms ms-30" onclick="toggleDetail('d-ms30')"><div class="ms-lbl">30-Day</div><div class="ms-score">3.1</div><div class="ms-note">Onboarding &amp; ramp</div><div class="ms-hint">▸ click for detail</div></div>
-      <div class="ms ms-60" onclick="toggleDetail('d-ms60')"><div class="ms-lbl">60-Day</div><div class="ms-score">3.5</div><div class="ms-note">Building momentum</div><div class="ms-hint">▸ click for detail</div></div>
-      <div class="ms ms-90" onclick="toggleDetail('d-ms90')"><div class="ms-lbl">90-Day</div><div class="ms-score">3.9</div><div class="ms-note">Approaching full speed</div><div class="ms-hint">▸ click for detail</div></div>
-      <div class="ms ms-1y" onclick="toggleDetail('d-ms1y')"><div class="ms-lbl">1-Year</div><div class="ms-score">4.2</div><div class="ms-note">Fully productive</div><div class="ms-hint">▸ click for detail</div></div>
-    </div>
-    <p class="hint">Manager-rated 1–5 · cohort average across all 100 hires</p>
-  </div>
-
-  <div class="detail-box" id="d-ms30" style="display:none;">
-    <h3>📋 30-Day Review — Cohort Analysis</h3>
-    <p><strong>Cohort average: 3.1/5.</strong> The 30-day review captures early onboarding quality and initial role fit signal.</p>
-    <ul>
-      <li>Score distribution: 12 hires scored ≥4.0 (early standouts), 61 scored 3.0–3.9 (on track), 27 scored below 3.0 (at-risk)</li>
-      <li>The 27 at-risk hires at 30 days: 19 recovered to ≥3.5 by 90 days; 8 remained below 3.5 and ultimately separated</li>
-      <li>Strongest departments at 30 days: Engineering (3.6 avg) and People (3.8 avg)</li>
-      <li>Weakest departments: Sales (2.9 avg) — historically consistent; Sales ramp takes longer due to pipeline build time</li>
-      <li>Key 30-day predictor: hires who completed pre-boarding modules scored <strong>0.5 points higher</strong> on average</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-ms30')">✕ close</span>
-  </div>
-  <div class="detail-box" id="d-ms60" style="display:none;">
-    <h3>📋 60-Day Review — Cohort Analysis</h3>
-    <p><strong>Cohort average: 3.5/5.</strong> The 60-day mark shows the steepest average score improvement (+0.4) of any interval.</p>
-    <ul>
-      <li>93% of hires who scored ≥3.5 at 60 days went on to complete the full year — strong retention predictor</li>
-      <li>Score improvement from 30→60 days averaged +0.4 pts. Hires who improved less than +0.2 had 3× higher attrition risk</li>
-      <li>The 60-day check-in is where manager coaching impact is most visible — structured 1:1 cadence correlated with +0.3 score lift</li>
-      <li>Remote hires scored 0.2 pts lower at 60 days on average, but caught up by 90 days when intentional touchpoints were in place</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-ms60')">✕ close</span>
-  </div>
-  <div class="detail-box" id="d-ms90" style="display:none;">
-    <h3>📋 90-Day Review — Cohort Analysis</h3>
-    <p><strong>Cohort average: 3.9/5.</strong> The 90-day score is the strongest early predictor of 1-year performance and retention.</p>
-    <ul>
-      <li>Correlation between 90-day and 1-year score: <strong>r=0.81</strong> — the single best predictive checkpoint</li>
-      <li>Hires scoring ≥4.0 at 90 days had 96% 1-year retention vs 71% for those scoring below 3.5</li>
-      <li>47 hires reached ≥4.0 at 90 days; 31 of those 47 were ultimately classified as high performers</li>
-      <li>Recommendation: consider using 90-day score as a formal gate for confirming permanent employment status</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-ms90')">✕ close</span>
-  </div>
-  <div class="detail-box" id="d-ms1y" style="display:none;">
-    <h3>📋 1-Year Review — Cohort Analysis</h3>
-    <p><strong>Cohort average: 4.2/5.</strong> 82 of 100 hires reached the 1-year review; 18 had separated before the milestone.</p>
-    <ul>
-      <li>Of 82 who completed the review: 34 rated HP (≥4.5), 41 rated solid performer (3.5–4.4), 7 rated below expectations (&lt;3.5)</li>
-      <li>The 7 below-expectations hires at 1 year represent candidates for performance management in Year 2</li>
-      <li>Average 1-year score by source: Referral (4.6), Career site (4.3), Campus (4.2), LinkedIn (3.9), Agency (3.5)</li>
-      <li>3 hires received promotions at or before the 1-year mark — all sourced via employee referral</li>
-    </ul>
-    <span class="detail-close" onclick="toggleDetail('d-ms1y')">✕ close</span>
-  </div>
-
-  <!-- Retention + TTP -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Time to Productivity by Source (avg weeks)</div>
-      <div class="bar-row"><span class="bar-lbl">Employee referral</span><div class="bar-track"><div class="bar-fill b-blue" style="width:46%">5.5 wks</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Company career site</span><div class="bar-track"><div class="bar-fill b-pink" style="width:54%">6.5 wks</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">University / campus</span><div class="bar-track"><div class="bar-fill b-purple" style="width:63%">7.5 wks</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">LinkedIn / job boards</span><div class="bar-track"><div class="bar-fill b-teal" style="width:71%">8.5 wks</div></div></div>
-      <div class="bar-row"><span class="bar-lbl">Agency / recruiter</span><div class="bar-track"><div class="bar-fill b-amber" style="width:84%">10 wks</div></div></div>
-      <p class="hint">Productive = manager-rated ≥4/5 on core role tasks</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Quarterly Retention (of 100 hires)</div>
-      <div class="ret-grid">
-        <div class="ret-col"><div class="ret-val">98%</div><div class="ret-outer"><div class="ret-inner" style="height:98%;background:#BFDBFE;"></div></div><div class="ret-lbl">Q1</div></div>
-        <div class="ret-col"><div class="ret-val">94%</div><div class="ret-outer"><div class="ret-inner" style="height:94%;background:#BFDBFE;"></div></div><div class="ret-lbl">Q2</div></div>
-        <div class="ret-col"><div class="ret-val">89%</div><div class="ret-outer"><div class="ret-inner" style="height:89%;background:#99F6E4;"></div></div><div class="ret-lbl">Q3</div></div>
-        <div class="ret-col"><div class="ret-val">82%</div><div class="ret-outer"><div class="ret-inner" style="height:82%;background:#99F6E4;"></div></div><div class="ret-lbl">Q4/1yr</div></div>
-      </div>
-      <p class="hint">Blue = early period · Teal = higher-risk Q3–Q4 window</p>
-    </div>
-  </div>
-
-  <!-- Interviewer Summary -->
-  <div class="card">
-    <div class="card-title">Interviewer Scorecard — click a name to see their hire outcomes</div>
-    <table class="emp-table">
-      <thead>
+    <table>
         <tr>
-          <th>Interviewer</th>
-          <th>Role</th>
-          <th>Hires</th>
-          <th>Avg 1-Yr Score</th>
-          <th>HP%</th>
-          <th>1-Yr Retention</th>
-          <th>Avg TTP</th>
-          <th>Mgr Sat</th>
-          <th>Rating</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>1-Year Score</th>
+            <th>High Performer</th>
         </tr>
-      </thead>
-      <tbody>
+
         <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#FEF3C7;color:#92400E;">RL</div><div><span class="emp-nm" onclick="showInterviewer(1)">Rachel Lim</span><div class="emp-role-sm">Talent Partner</div></div></div></td>
-          <td style="font-size:12px;color:var(--muted);">All depts</td>
-          <td style="font-family:var(--mono);font-size:13px;font-weight:600;">28</td>
-          <td><span class="sp s-hi">4.4</span></td>
-          <td><span class="sp s-hi">46%</span></td>
-          <td><span class="sp s-hi">89%</span></td>
-          <td style="font-family:var(--mono);font-size:12px;">6.1 wks</td>
-          <td><span class="sp s-hi">4.5</span></td>
-          <td><span class="badge bp">⭐ Top</span></td>
+            <td>Jordan Mercer</td>
+            <td>Product Designer</td>
+            <td>Referral</td>
+            <td>Active</td>
+            <td>4.7</td>
+            <td><span class="tag good">Yes</span></td>
         </tr>
+
         <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#DCFCE7;color:#14532D;">DW</div><div><span class="emp-nm" onclick="showInterviewer(2)">Devon Walsh</span><div class="emp-role-sm">Eng. Manager</div></div></div></td>
-          <td style="font-size:12px;color:var(--muted);">Engineering</td>
-          <td style="font-family:var(--mono);font-size:13px;font-weight:600;">22</td>
-          <td><span class="sp s-hi">4.2</span></td>
-          <td><span class="sp s-hi">41%</span></td>
-          <td><span class="sp s-hi">91%</span></td>
-          <td style="font-family:var(--mono);font-size:12px;">6.8 wks</td>
-          <td><span class="sp s-hi">4.3</span></td>
-          <td><span class="badge bg">Strong</span></td>
+            <td>Marcus Holt</td>
+            <td>Data Analyst</td>
+            <td>LinkedIn</td>
+            <td>Active</td>
+            <td>3.8</td>
+            <td><span class="tag bad">No</span></td>
         </tr>
+
         <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#FCE7F3;color:#831843;">KP</div><div><span class="emp-nm" onclick="showInterviewer(3)">Keiko Park</span><div class="emp-role-sm">HR Director</div></div></div></td>
-          <td style="font-size:12px;color:var(--muted);">People &amp; Ops</td>
-          <td style="font-family:var(--mono);font-size:13px;font-weight:600;">18</td>
-          <td><span class="sp s-hi">4.1</span></td>
-          <td><span class="sp s-md">33%</span></td>
-          <td><span class="sp s-hi">83%</span></td>
-          <td style="font-family:var(--mono);font-size:12px;">7.2 wks</td>
-          <td><span class="sp s-hi">4.2</span></td>
-          <td><span class="badge bg">Strong</span></td>
+            <td>Taye Osei</td>
+            <td>Software Engineer</td>
+            <td>Campus</td>
+            <td>Active</td>
+            <td>4.3</td>
+            <td><span class="tag good">Yes</span></td>
         </tr>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#E0F2FE;color:#0C4A6E;">TA</div><div><span class="emp-nm" onclick="showInterviewer(4)">Tomás Aguilar</span><div class="emp-role-sm">Sales Director</div></div></div></td>
-          <td style="font-size:12px;color:var(--muted);">Sales</td>
-          <td style="font-family:var(--mono);font-size:13px;font-weight:600;">20</td>
-          <td><span class="sp s-md">3.6</span></td>
-          <td><span class="sp s-md">20%</span></td>
-          <td><span class="sp s-md">70%</span></td>
-          <td style="font-family:var(--mono);font-size:12px;">10.4 wks</td>
-          <td><span class="sp s-md">3.5</span></td>
-          <td><span class="badge ba">Develop</span></td>
-        </tr>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#F3E8FF;color:#581C87;">BN</div><div><span class="emp-nm" onclick="showInterviewer(5)">Brianna Nash</span><div class="emp-role-sm">Talent Partner</div></div></div></td>
-          <td style="font-size:12px;color:var(--muted);">All depts</td>
-          <td style="font-family:var(--mono);font-size:13px;font-weight:600;">12</td>
-          <td><span class="sp s-md">3.8</span></td>
-          <td><span class="sp s-md">25%</span></td>
-          <td><span class="sp s-md">75%</span></td>
-          <td style="font-family:var(--mono);font-size:12px;">8.9 wks</td>
-          <td><span class="sp s-md">3.7</span></td>
-          <td><span class="badge ba">Develop</span></td>
-        </tr>
-      </tbody>
+
     </table>
-    <p class="hint">Rating: Top = avg 1-yr score ≥4.3 &amp; HP% ≥40% · Strong = ≥4.0 · Develop = below benchmark · click any name for full interviewer profile</p>
-  </div>
 
-  <!-- Employee Table -->
-  <div class="card">
-    <div class="card-title">All Employees — click a name to open their full profile</div>
-    <table class="emp-table">
-      <thead><tr><th>Employee</th><th>Source</th><th>Status</th><th>30-Day</th><th>60-Day</th><th>90-Day</th><th>1-Year</th><th>HP</th><th>TTP</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#E6F1FB;color:#0C447C;">JM</div><div><span class="emp-nm" onclick="showEmployee(1)">Jordan Mercer</span><div class="emp-role-sm">Sr. Product Designer</div></div></div></td>
-          <td><span class="badge bb">Referral</span></td><td><span class="badge bg">Active</span></td>
-          <td><span class="sp s-md">3.6</span></td><td><span class="sp s-hi">4.1</span></td><td><span class="sp s-hi">4.5</span></td><td><span class="sp s-hi">4.7</span></td>
-          <td><span class="badge bp">Yes</span></td><td style="font-family:var(--mono);font-size:12px;">5 wks</td>
-        </tr>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#E1F5EE;color:#085041;">MH</div><div><span class="emp-nm" onclick="showEmployee(2)">Marcus Holt</span><div class="emp-role-sm">Data Analyst II</div></div></div></td>
-          <td><span class="badge bgr">LinkedIn</span></td><td><span class="badge bg">Active</span></td>
-          <td><span class="sp s-lo">2.9</span></td><td><span class="sp s-md">3.3</span></td><td><span class="sp s-md">3.6</span></td><td><span class="sp s-md">3.8</span></td>
-          <td><span class="badge bgr">No</span></td><td style="font-family:var(--mono);font-size:12px;">8 wks</td>
-        </tr>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#EEEDFE;color:#3C3489;">SV</div><div><span class="emp-nm" onclick="showEmployee(3)">Sofia Vasquez</span><div class="emp-role-sm">Account Executive</div></div></div></td>
-          <td><span class="badge ba">Agency</span></td><td><span class="badge br">Separated</span></td>
-          <td><span class="sp s-md">3.2</span></td><td><span class="sp s-md">3.0</span></td><td><span class="sp s-md">3.1</span></td><td><span class="sp s-na">N/A</span></td>
-          <td><span class="badge bgr">No</span></td><td style="font-family:var(--mono);font-size:12px;">11 wks</td>
-        </tr>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#FAEEDA;color:#633806;">TO</div><div><span class="emp-nm" onclick="showEmployee(4)">Taye Osei</span><div class="emp-role-sm">Software Engineer II</div></div></div></td>
-          <td><span class="badge bgr">Campus</span></td><td><span class="badge bg">Active</span></td>
-          <td><span class="sp s-md">3.4</span></td><td><span class="sp s-md">3.9</span></td><td><span class="sp s-hi">4.2</span></td><td><span class="sp s-hi">4.3</span></td>
-          <td><span class="badge bp">Yes</span></td><td style="font-family:var(--mono);font-size:12px;">7 wks</td>
-        </tr>
-        <tr>
-          <td><div class="emp-cell"><div class="emp-av" style="background:#FBEAF0;color:#72243E;">NC</div><div><span class="emp-nm" onclick="showEmployee(5)">Nadia Chen</span><div class="emp-role-sm">HR Business Partner</div></div></div></td>
-          <td><span class="badge bgr">Career site</span></td><td><span class="badge bg">Active</span></td>
-          <td><span class="sp s-md">3.8</span></td><td><span class="sp s-hi">4.2</span></td><td><span class="sp s-hi">4.4</span></td><td><span class="sp s-hi">4.5</span></td>
-          <td><span class="badge bp">Yes</span></td><td style="font-family:var(--mono);font-size:12px;">6 wks</td>
-        </tr>
-      </tbody>
-    </table>
-    <p class="hint">Scores: green ≥4.0 · amber 3.0–3.9 · red &lt;3.0 · TTP = Time to Productivity</p>
-  </div>
-</div><!-- /cohort -->
-
-
-<!-- ══════════════════════════
-     EMPLOYEE VIEW (dynamic)
-══════════════════════════ -->
-<div class="view" id="view-employee">
-  <div id="emp-content"></div>
 </div>
 
-<!-- ══════════════════════════
-     INTERVIEWER VIEW (dynamic)
-══════════════════════════ -->
-<div class="view" id="view-interviewer">
-  <div id="int-content"></div>
-</div>
-
-</main>
-</div>
-
-<script>
-var employees = {
-  1:{
-    initials:"JM",avatarBg:"#E6F1FB",avatarColor:"#0C447C",
-    name:"Jordan Mercer",role:"Senior Product Designer",dept:"Product",
-    hireDate:"Mar 11, 2024",tenure:"2 yr 1 mo",source:"Employee referral",
-    referredBy:"Anika Torres",status:"Active",statusClass:"bg",
-    location:"Chicago, IL",ttp:"5 wks",isHP:true,latestScore:"4.7/5",
-    reviews:[
-      {cls:"ms-30",period:"30-Day",score:"3.6",note:"Strong start, needs tool ramp",
-       detail:"Jordan's 30-day score of 3.6 placed her in the top quartile for this cohort. She completed all onboarding modules in the first week and was independently navigating design tools by day 12. Manager noted initial friction with the internal design system — resolved by day 25 through peer pairing with a senior designer."},
-      {cls:"ms-60",period:"60-Day",score:"4.1",note:"Delivering independently",
-       detail:"By 60 days Jordan was leading her own work streams on two active product tracks. Score reflects full task independence — no longer requiring structured guidance on day-to-day deliverables. First design presented to a VP stakeholder at day 52 was received positively with minor revisions."},
-      {cls:"ms-90",period:"90-Day",score:"4.5",note:"Exceeding expectations",
-       detail:"The 90-day score of 4.5 is among the highest in the cohort and confirms high performer trajectory. Jordan took ownership of the mobile checkout redesign project — originally staffed to a senior IC — and delivered it on schedule. Manager rating reflects both output quality and strong cross-functional collaboration."},
-      {cls:"ms-1y",period:"1-Year",score:"4.7",note:"High performer — promoted",
-       detail:"Jordan completed her first year with a 4.7 rating and was promoted to Lead Designer at the 12-month mark — one of only 3 promotions in the cohort. Her project portfolio included 4 shipped features and one design system contribution cited company-wide. Referral source (Anika Torres) received a referral bonus."}
-    ],
-    mgr:{name:"Priya Okonkwo",overall:4.8,skills:4.9,culture:4.7,ramp:4.5,
-      detail:"Priya's post-90-day survey placed Jordan in the top 5% of new hires she has managed in 4 years. Skills match was rated nearly perfect at 4.9 — the role requirements were very precisely matched to Jordan's portfolio. Ramp speed of 4.5 reflects fast tool adoption; the only friction was the internal component library which has since been flagged for better onboarding documentation."},
-    timeline:[
-      {date:"Mar 11, 2024",event:"Hired",detail:"Onboarding began · Chicago HQ · Employee referral from Anika Torres"},
-      {date:"Apr 14, 2024",event:"30-day review",detail:"Score 3.6 · On track · Tool ramp noted as minor gap"},
-      {date:"May 12, 2024",event:"60-day review",detail:"Score 4.1 · Fully independent · Leading two design tracks"},
-      {date:"Jun 10, 2024",event:"90-day review passed",detail:"Score 4.5 · HP trajectory confirmed · Took on senior-level project"},
-      {date:"Mar 11, 2025",event:"1-year review + promotion",detail:"Score 4.7 · Promoted to Lead Designer · Top 3% of FY2024 cohort"}
-    ],
-    insights:[
-      {icon:"🎯",title:"Referral advantage",desc:"54% of referral hires become HPs. Jordan's result is consistent with this channel's pattern."},
-      {icon:"⚡",title:"Fastest in dept",desc:"Jordan ramped 2.5 weeks faster than the Product dept average of 7.5 weeks."},
-      {icon:"📈",title:"Promotion signal",desc:"30→90 day score trajectory (+0.9 pts) predicted promotion 9 months before it occurred."}
-    ]
-  },
-  2:{
-    initials:"MH",avatarBg:"#E1F5EE",avatarColor:"#085041",
-    name:"Marcus Holt",role:"Data Analyst II",dept:"Analytics",
-    hireDate:"Jun 3, 2024",tenure:"1 yr 10 mo",source:"LinkedIn",
-    referredBy:null,status:"Active",statusClass:"bg",
-    location:"Remote — Austin, TX",ttp:"8 wks",isHP:false,latestScore:"3.8/5",
-    reviews:[
-      {cls:"ms-30",period:"30-Day",score:"2.9",note:"Slower onboarding than expected",
-       detail:"Marcus's 30-day score of 2.9 placed him in the at-risk tier and triggered a check-in conversation between his manager and the recruiting team. Root cause identified as a gap in SQL proficiency not fully surfaced during interview — the take-home assignment tested BigQuery syntax his background didn't cover. A SQL coaching plan was initiated at day 32."},
-      {cls:"ms-60",period:"60-Day",score:"3.3",note:"Improving, needs SQL coaching",
-       detail:"Score improved by 0.4 pts from 30 to 60 days — a positive trend that put Marcus off the formal PIP track. He completed 3 coaching sessions with a senior analyst and began contributing to weekly reporting independently. Manager noted that his communication and stakeholder management skills are notably above average for the role level, partially compensating for technical gaps."},
-      {cls:"ms-90",period:"90-Day",score:"3.6",note:"Meets most expectations",
-       detail:"At 90 days Marcus is performing at the 'meets expectations' level across most dimensions. Technical proficiency has improved significantly with coaching but remains the limiting factor for stretch assignments. His data storytelling and Tableau work are above the role benchmark. Manager is recommending continued investment rather than performance management."},
-      {cls:"ms-1y",period:"1-Year",score:"3.8",note:"Solid contributor, not HP tier",
-       detail:"Marcus completed his first year as a solid mid-tier performer. He owns two recurring reporting workstreams independently and has become the team's go-to for visualization work. He is not on an HP trajectory but attrition risk is low — he has expressed high satisfaction with team culture and remote flexibility in his engagement survey."}
-    ],
-    mgr:{name:"David Reyes",overall:3.7,skills:3.5,culture:4.1,ramp:3.2,
-      detail:"David's manager survey reflects a mixed but ultimately positive assessment. The skills gap surfaced at 30 days has been partially addressed but remains a ceiling on Marcus's near-term scope. Culture fit is the clear bright spot at 4.1 — Marcus has become a well-liked team member and active contributor to team rituals. Ramp speed of 3.2 reflects the SQL coaching period; David notes this could have been avoided with a more rigorous technical screen."},
-    timeline:[
-      {date:"Jun 3, 2024",event:"Hired",detail:"Remote onboarding · Austin, TX · LinkedIn application"},
-      {date:"Jul 8, 2024",event:"30-day review",detail:"Score 2.9 · PIP risk flagged · SQL coaching plan initiated"},
-      {date:"Aug 5, 2024",event:"60-day review",detail:"Score 3.3 · Improving trend · Off PIP track"},
-      {date:"Sep 3, 2024",event:"90-day review passed",detail:"Score 3.6 · Meets standard · No further escalation"},
-      {date:"Jun 3, 2025",event:"1-year review",detail:"Score 3.8 · Retained · No promotion · Low attrition risk"}
-    ],
-    insights:[
-      {icon:"⚠️",title:"Screen gap",desc:"SQL proficiency gap missed in interview. Recommend adding a timed SQL screen for all Analytics roles."},
-      {icon:"💬",title:"Culture strength",desc:"4.1 culture fit despite technical struggles — suggests strong team integration and high EQ."},
-      {icon:"📊",title:"Trajectory",desc:"0.9pt improvement from 30-day to 1-year. Steady grower — worth continued coaching investment."}
-    ]
-  },
-  3:{
-    initials:"SV",avatarBg:"#EEEDFE",avatarColor:"#3C3489",
-    name:"Sofia Vasquez",role:"Account Executive",dept:"Sales",
-    hireDate:"Jan 22, 2024",tenure:"9 months (separated)",source:"Agency / recruiter",
-    referredBy:null,status:"Separated",statusClass:"br",
-    location:"New York, NY",ttp:"11 wks",isHP:false,latestScore:"3.1/5",
-    reviews:[
-      {cls:"ms-30",period:"30-Day",score:"3.2",note:"Onboarding complete",
-       detail:"Sofia's 30-day score of 3.2 was average for the Sales cohort. She completed onboarding on schedule and demonstrated strong product knowledge in her mock demos. The early concern flagged by her manager was pipeline generation pace — she had contacted fewer target accounts than peers in week 3. This was attributed to getting comfortable with the CRM workflow."},
-      {cls:"ms-60",period:"60-Day",score:"3.0",note:"Pipeline building slowly",
-       detail:"The 60-day score of 3.0 represented a slight decline from 30 days — an unusual pattern that flagged further attention. Pipeline was at 40% of the 60-day target. Manager noted that Sofia was highly skilled in discovery conversations when she got in front of prospects, but her outbound volume was consistently below target. Coaching focused on outbound activity discipline."},
-      {cls:"ms-90",period:"90-Day",score:"3.1",note:"Below quota target",
-       detail:"At 90 days Sofia was at 58% of her quota target. An improvement plan was set with specific pipeline and activity metrics. The agency that sourced Sofia has been notified that the role requires a high-volume outbound profile — feedback suggests the agency brief over-indexed on enterprise relationship skills vs. outbound volume capacity. Sofia was engaged but struggling with the volume expectations."},
-      {cls:"ms-1y",period:"1-Year",score:null,note:"Voluntarily resigned at 9 months",
-       detail:"Sofia submitted her resignation at the 9-month mark citing role misalignment — specifically that the outbound volume requirements were not clearly communicated during the interview process. Exit interview indicated no concerns with the company, team, or manager — the mismatch was squarely the role expectation gap. She has since joined an enterprise sales role at a firm with longer sales cycles, which better fits her skill profile."}
-    ],
-    mgr:{name:"Carla Nguyen",overall:2.9,skills:3.1,culture:3.3,ramp:2.5,
-      detail:"Carla's survey scores reflect the difficult experience of managing a role misalignment. Skills match at 3.1 reflects Sofia's strong discovery and relationship skills but low outbound execution. Ramp speed at 2.5 was the lowest in the cohort — the 11-week TTP was primarily driven by CRM adoption challenges and slow pipeline build. Carla noted that Sofia was a genuinely likable team member and the separation was 'the wrong person in the wrong seat, not the wrong person overall.'"},
-    timeline:[
-      {date:"Jan 22, 2024",event:"Hired",detail:"Via agency · New York · Agency brief: enterprise AE with outbound experience"},
-      {date:"Feb 21, 2024",event:"30-day review",detail:"Score 3.2 · Average · Pipeline pace flagged early"},
-      {date:"Mar 21, 2024",event:"60-day review",detail:"Score 3.0 · Declining · Outbound volume coaching initiated"},
-      {date:"Apr 22, 2024",event:"90-day review",detail:"Score 3.1 · Below quota · Formal improvement plan set"},
-      {date:"Oct 15, 2024",event:"Voluntary resignation",detail:"Month 9 · Role misalignment cited · Clean exit · Positive references given"}
-    ],
-    insights:[
-      {icon:"🔍",title:"Agency brief gap",desc:"Role brief over-indexed on relationship skills vs. outbound volume. Revised brief sent to agency in Q4 2024."},
-      {icon:"📋",title:"Interview redesign",desc:"Added outbound simulation exercise to Sales interview process following this and 2 similar separations."},
-      {icon:"💡",title:"Pattern alert",desc:"3 of 18 agency hires separated before 1 year — the highest attrition rate of any source channel."}
-    ]
-  },
-  4:{
-    initials:"TO",avatarBg:"#FAEEDA",avatarColor:"#633806",
-    name:"Taye Osei",role:"Software Engineer II",dept:"Engineering",
-    hireDate:"Sep 9, 2024",tenure:"1 yr 7 mo",source:"University / campus",
-    referredBy:null,status:"Active",statusClass:"bg",
-    location:"San Francisco, CA",ttp:"7 wks",isHP:true,latestScore:"4.3/5",
-    reviews:[
-      {cls:"ms-30",period:"30-Day",score:"3.4",note:"Ramp-up underway",
-       detail:"Taye's 30-day score of 3.4 is the highest in the cohort among campus hires and above the Engineering department average of 3.1 at this checkpoint. He completed the engineering onboarding track in 18 days (3 days faster than average) and submitted his first PR at day 21. Code review notes cited clean, well-documented work for an early-career hire."},
-      {cls:"ms-60",period:"60-Day",score:"3.9",note:"First PR merged and reviewed",
-       detail:"Score jumped 0.5 pts from 30 to 60 days — the largest single-interval improvement in the Engineering cohort. Taye had 3 PRs merged, participated in an on-call rotation, and started attending architecture review meetings as an observer. His manager nominated him for the internal 'Fast Start' recognition program at day 55."},
-      {cls:"ms-90",period:"90-Day",score:"4.2",note:"Owns two feature tracks",
-       detail:"At 90 days Taye was independently owning two feature tracks in the mobile backend — a scope level typically not reached until 6+ months for campus hires. His 90-day score of 4.2 places him above the median of all new hires in the cohort, not just campus. Manager noted that his systems thinking is unusually strong for a new grad and he regularly identifies edge cases in others' code reviews."},
-      {cls:"ms-1y",period:"1-Year",score:"4.3",note:"High performer — on track for senior",
-       detail:"Taye completed his first year as a confirmed high performer. He led the delivery of a backend service used by 3 product teams, mentored two interns over the summer, and was cited in the Engineering All-Hands as a standout campus hire. He is on the E3→E4 promotion track with an expected promotion window of Q2 2026."}
-    ],
-    mgr:{name:"Ines Park",overall:4.4,skills:4.6,culture:4.5,ramp:4.0,
-      detail:"Ines rated Taye highly across all dimensions. Skills match at 4.6 reflects strong CS fundamentals from UIUC and pre-internship preparation. Culture fit at 4.5 is consistent with his team integration — he organizes a weekly lunch for the mobile backend team and has become a connector on the floor. Ramp speed of 4.0 reflects the 7-week TTP — solid for a campus hire, though Ines noted that earlier access to production systems would have shaved another 1–2 weeks off the ramp."},
-    timeline:[
-      {date:"Sep 9, 2024",event:"Hired",detail:"Campus hire · UIUC Computer Science · SF office"},
-      {date:"Oct 9, 2024",event:"30-day review",detail:"Score 3.4 · Top of campus cohort · First PR at day 21"},
-      {date:"Nov 8, 2024",event:"60-day review",detail:"Score 3.9 · Fast Start nomination · 3 PRs merged"},
-      {date:"Dec 8, 2024",event:"90-day review passed",detail:"Score 4.2 · Owns 2 feature tracks · Exceeds campus-hire benchmark"},
-      {date:"Sep 9, 2025",event:"1-year review",detail:"Score 4.3 · HP designation · Promotion track confirmed for 2026"}
-    ],
-    insights:[
-      {icon:"🎓",title:"Campus ROI",desc:"Taye is among the top 3 campus hires in 3 years. UIUC pipeline warrants expansion from 2 to 5 hires in FY2025."},
-      {icon:"🚀",title:"Ramp trajectory",desc:"Fastest 30→90 day improvement (+0.8 pts) in the Engineering cohort of 22 hires."},
-      {icon:"🔮",title:"Promotion signal",desc:"4.2+ at 90 days has predicted promotion within 18 months in 7 of the last 8 cases tracked."}
-    ]
-  },
-  5:{
-    initials:"NC",avatarBg:"#FBEAF0",avatarColor:"#72243E",
-    name:"Nadia Chen",role:"HR Business Partner",dept:"People",
-    hireDate:"Apr 29, 2024",tenure:"1 yr 11 mo",source:"Company career site",
-    referredBy:null,status:"Active",statusClass:"bg",
-    location:"Chicago, IL",ttp:"6 wks",isHP:true,latestScore:"4.5/5",
-    reviews:[
-      {cls:"ms-30",period:"30-Day",score:"3.8",note:"Quick policy absorption",
-       detail:"Nadia's 30-day score of 3.8 is the highest in the People department cohort and in the top 10% of all new hires at this checkpoint. She completed the full ER policy library review in her first 10 days and was independently handling low-complexity ER cases by day 18 — typically a day-45 milestone. Her prior experience at a similarly-sized company significantly reduced the contextual learning curve."},
-      {cls:"ms-60",period:"60-Day",score:"4.2",note:"Running ER cases solo",
-       detail:"By 60 days Nadia was managing a full ER caseload of 8 active cases independently, attending weekly business partner meetings with 3 VP stakeholders, and contributing to a performance management process redesign. Her manager noted her ability to manage up confidently — she surfaced a policy gap to the CPO directly and proposed a fix that was adopted within the quarter."},
-      {cls:"ms-90",period:"90-Day",score:"4.4",note:"Trusted partner to 3 VPs",
-       detail:"At 90 days Nadia had established trusted relationships with the VPs of Product, Engineering, and Sales. Her 4.4 score reflects both performance output and stakeholder influence — she closed 6 ER cases with no escalations, facilitated 2 difficult performance conversations alongside managers, and developed a new-hire check-in framework now being rolled out org-wide."},
-      {cls:"ms-1y",period:"1-Year",score:"4.5",note:"High performer — expanded scope",
-       detail:"Nadia completed her first year as a high performer with an expanded scope — she took on the full Chicago HQ HRBP remit including ~280 employees across 4 departments, up from the original ~180 scoped at hire. She also co-led the FY2025 compensation benchmarking project. Her manager described her as 'operating at the senior level already' and a formal leveling review is scheduled for Q3 2026."}
-    ],
-    mgr:{name:"Leon Marsh",overall:4.6,skills:4.5,culture:4.8,ramp:4.4,
-      detail:"Leon's survey reflects the highest overall manager satisfaction score in the cohort at 4.6. Culture fit at 4.8 is the standout dimension — Nadia's values alignment with the People team's people-first philosophy was evident from her first week. Skills match at 4.5 reflects strong HRBP fundamentals; Leon noted one area for development is global employment law exposure as the company scales internationally. Ramp speed of 4.4 is exceptional and reflects both Nadia's preparation and the quality of the HRBP onboarding guide she was given."},
-    timeline:[
-      {date:"Apr 29, 2024",event:"Hired",detail:"Career site apply · Chicago HQ · HRBP for ~180 employees"},
-      {date:"May 30, 2024",event:"30-day review",detail:"Score 3.8 · Top of People cohort · Handling low-complexity ER by day 18"},
-      {date:"Jun 28, 2024",event:"60-day review",detail:"Score 4.2 · Full ER caseload · Policy gap surfaced to CPO"},
-      {date:"Jul 28, 2024",event:"90-day review passed",detail:"Score 4.4 · Trusted by 3 VPs · New check-in framework adopted org-wide"},
-      {date:"Apr 29, 2025",event:"1-year review",detail:"Score 4.5 · HP · Scope expanded to 280 employees · Senior leveling review pending"}
-    ],
-    insights:[
-      {icon:"🌐",title:"Career site quality",desc:"Career site produces 38% HP rate — 2nd best channel. Nadia is a strong example of self-selecting, highly prepared applicants."},
-      {icon:"📐",title:"Scope expansion",desc:"Scope grew 56% in year 1 — rare for an HRBP hire. Signals strong capacity and organizational trust."},
-      {icon:"🤝",title:"Stakeholder impact",desc:"Nadia's new-hire check-in framework is now standard across all Chicago HQ onboarding — measurable org-level impact."}
-    ]
-  }
-};
-
-function showView(viewId) {
-  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  document.querySelectorAll('.sb-link').forEach(function(l){ l.classList.remove('active'); });
-  document.getElementById('view-' + viewId).classList.add('active');
-  var nav = document.getElementById('nav-' + viewId);
-  if(nav) nav.classList.add('active');
-}
-
-function showEmployee(id) {
-  var emp = employees[id];
-  if(!emp) return;
-
-  var refRow = emp.referredBy
-    ? '<div class="kv-row"><span class="kv-key">Referred by</span><span class="kv-val">' + emp.referredBy + '</span></div>'
-    : '';
-
-  var reviewTiles = emp.reviews.map(function(r, i){
-    var scoreStr = r.score !== null && r.score !== undefined ? r.score : '—';
-    return '<div class="ms ' + r.cls + '" onclick="toggleDetail(\'rd' + id + '_' + i + '\')">' +
-      '<div class="ms-lbl">' + r.period + '</div>' +
-      '<div class="ms-score">' + scoreStr + '</div>' +
-      '<div class="ms-note">' + r.note + '</div>' +
-      '<div class="ms-hint">▸ click for detail</div>' +
-      '</div>' +
-      '<div class="detail-box" id="rd' + id + '_' + i + '" style="display:none;grid-column:1/-1">' +
-      '<h3>' + r.period + ' Review — Detail</h3>' +
-      '<p>' + r.detail + '</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'rd' + id + '_' + i + '\')">✕ close</span>' +
-      '</div>';
-  }).join('');
-
-  var mgrColor = function(v){ return v >= 4.3 ? '#639922' : v >= 3.5 ? '#BA7517' : '#E24B4A'; };
-  var mgrBars = [
-    {label:'Overall quality',val:emp.mgr.overall},
-    {label:'Skills match',val:emp.mgr.skills},
-    {label:'Culture fit',val:emp.mgr.culture},
-    {label:'Ramp speed',val:emp.mgr.ramp}
-  ].map(function(b){
-    return '<div class="mgr-bar"><div class="mgr-hd"><span>' + b.label + '</span><span>' + b.val.toFixed(1) + ' / 5</span></div>' +
-      '<div class="mgr-track"><div class="mgr-fill" style="width:' + (b.val/5*100).toFixed(0) + '%;background:' + mgrColor(b.val) + ';"></div></div></div>';
-  }).join('');
-
-  var tlItems = emp.timeline.map(function(t, i){
-    var isLast = i === emp.timeline.length - 1;
-    return '<div class="tl-item"><div class="tl-dot' + (isLast?' last':'') + '"></div>' +
-      '<div class="tl-date">' + t.date + '</div>' +
-      '<div class="tl-event">' + t.event + '</div>' +
-      '<div class="tl-detail">' + t.detail + '</div></div>';
-  }).join('');
-
-  var insightCards = emp.insights.map(function(ins){
-    return '<div class="insight"><div class="insight-icon">' + ins.icon + '</div>' +
-      '<div class="insight-title">' + ins.title + '</div>' +
-      '<div class="insight-desc">' + ins.desc + '</div></div>';
-  }).join('');
-
-  var hpBadge = emp.isHP ? '<span class="badge bp">High performer</span>' : '';
-
-  document.getElementById('emp-content').innerHTML =
-    '<div class="breadcrumb">' +
-      '<a onclick="showView(\'cohort\')">← Cohort Scorecard</a>' +
-      '<span class="sep">/</span>' +
-      '<span class="current">' + emp.name + '</span>' +
-    '</div>' +
-    '<div class="page-hd"><h2>' + emp.name + '</h2><p>Individual quality of hire profile — click any metric or review tile for more detail</p></div>' +
-
-    '<div class="emp-kpi-strip">' +
-      '<div class="ekpi" onclick="toggleDetail(\'epd-hiredate' + id + '\')">' +
-        '<div class="ekpi-lbl">Hire Date</div><div class="ekpi-val sm">' + emp.hireDate + '</div>' +
-        '<div class="ekpi-hint">▸ detail</div></div>' +
-      '<div class="ekpi" onclick="toggleDetail(\'epd-tenure' + id + '\')">' +
-        '<div class="ekpi-lbl">Tenure</div><div class="ekpi-val sm">' + emp.tenure + '</div>' +
-        '<div class="ekpi-hint">▸ detail</div></div>' +
-      '<div class="ekpi" onclick="toggleDetail(\'epd-score' + id + '\')">' +
-        '<div class="ekpi-lbl">Latest Rating</div><div class="ekpi-val">' + emp.latestScore + '</div>' +
-        '<div class="ekpi-hint">▸ detail</div></div>' +
-      '<div class="ekpi" onclick="toggleDetail(\'epd-ttp' + id + '\')">' +
-        '<div class="ekpi-lbl">Time to Productive</div><div class="ekpi-val sm">' + emp.ttp + '</div>' +
-        '<div class="ekpi-hint">▸ detail</div></div>' +
-    '</div>' +
-
-    '<div class="detail-box" id="epd-hiredate' + id + '" style="display:none;">' +
-      '<h3>📅 Hire Date Context</h3>' +
-      '<p>Hired <strong>' + emp.hireDate + '</strong> via <strong>' + emp.source + '</strong>. ' +
-      (emp.referredBy ? 'Referred internally by ' + emp.referredBy + '.' : 'Applied through the ' + emp.source + ' channel.') + '</p>' +
-      '<p>Time from application to offer: approximately 3.2 weeks (cohort avg: 3.8 weeks). Time from offer to start: 2.5 weeks.</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'epd-hiredate' + id + '\')">✕ close</span>' +
-    '</div>' +
-    '<div class="detail-box" id="epd-tenure' + id + '" style="display:none;">' +
-      '<h3>📆 Tenure & Retention Status</h3>' +
-      '<p>Current tenure: <strong>' + emp.tenure + '</strong>. Employment status: <strong>' + emp.status + '</strong>.</p>' +
-      (emp.status === 'Active'
-        ? '<p>This hire is currently retained and contributing. Based on cohort patterns, the highest attrition risk window (Q3–Q4) has been cleared. Retention probability for year 2 is estimated at 88% for active employees who cleared the 1-year review.</p>'
-        : '<p>This hire separated before the 1-year mark. Exit interview data has been logged and the sourcing channel (agency) has been flagged for brief review. The separation contributed to the cohort\'s 18% year-1 attrition rate.</p>') +
-      '<span class="detail-close" onclick="toggleDetail(\'epd-tenure' + id + '\')">✕ close</span>' +
-    '</div>' +
-    '<div class="detail-box" id="epd-score' + id + '" style="display:none;">' +
-      '<h3>⭐ Latest Performance Rating Context</h3>' +
-      '<p>Most recent manager rating: <strong>' + emp.latestScore + '</strong>. ' +
-      (emp.isHP ? 'This score qualifies as <strong>high performer</strong> tier (≥4.5/5 threshold).' : 'This score is in the <strong>solid contributor</strong> range (3.5–4.4).') + '</p>' +
-      '<p>Cohort average at equivalent checkpoint: 4.2/5. This hire is ' +
-      (parseFloat(emp.latestScore) >= 4.2 ? 'above' : 'below') + ' the cohort average.</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'epd-score' + id + '\')">✕ close</span>' +
-    '</div>' +
-    '<div class="detail-box" id="epd-ttp' + id + '" style="display:none;">' +
-      '<h3>⏱ Time to Productivity Context</h3>' +
-      '<p>Reached full productivity in <strong>' + emp.ttp + '</strong> (manager-rated ≥4/5 on core role tasks). Cohort average: 7.6 weeks.</p>' +
-      '<p>Source channel average (' + emp.source + '): ' +
-      ({'Employee referral':'5.5 wks','LinkedIn':'8.5 wks','Agency / recruiter':'10 wks','University / campus':'7.5 wks','Company career site':'6.5 wks'}[emp.source] || '7.6 wks') +
-      '. This hire ramped ' + (parseFloat(emp.ttp) < 7.6 ? 'faster' : 'slower') + ' than the cohort average.</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'epd-ttp' + id + '\')">✕ close</span>' +
-    '</div>' +
-
-    '<div class="prof-hd">' +
-      '<div class="prof-av" style="background:' + emp.avatarBg + ';color:' + emp.avatarColor + ';">' + emp.initials + '</div>' +
-      '<div><div class="prof-name">' + emp.name + '</div>' +
-      '<div class="prof-role">' + emp.role + ' · ' + emp.dept + '</div>' +
-      '<div class="badge-row">' +
-        '<span class="badge ' + emp.statusClass + '">' + emp.status + '</span>' +
-        '<span class="badge bb">' + emp.source + '</span>' +
-        hpBadge +
-        '<span class="badge bgr">' + emp.location + '</span>' +
-      '</div></div>' +
-    '</div>' +
-
-    '<div class="grid-2">' +
-      '<div class="card"><div class="card-title">Hire Details</div><div class="kv-list">' +
-        '<div class="kv-row"><span class="kv-key">Department</span><span class="kv-val">' + emp.dept + '</span></div>' +
-        '<div class="kv-row"><span class="kv-key">Hire date</span><span class="kv-val">' + emp.hireDate + '</span></div>' +
-        '<div class="kv-row"><span class="kv-key">Source channel</span><span class="kv-val">' + emp.source + '</span></div>' +
-        refRow +
-        '<div class="kv-row"><span class="kv-key">Location</span><span class="kv-val">' + emp.location + '</span></div>' +
-        '<div class="kv-row"><span class="kv-key">Status</span><span class="kv-val">' + emp.status + '</span></div>' +
-        '<div class="kv-row"><span class="kv-key">High performer</span><span class="kv-val">' + (emp.isHP ? 'Yes' : 'No') + '</span></div>' +
-      '</div></div>' +
-      '<div class="card"><div class="card-title">Manager: ' + emp.mgr.name + '</div>' +
-        mgrBars +
-        '<div class="detail-box" style="cursor:pointer;margin-top:10px;" onclick="toggleDetail(\'mgr-detail-' + id + '\')">' +
-          '<h3>📋 Manager Assessment — Full Notes</h3>' +
-          '<p id="mgr-detail-' + id + '-text" style="display:none;">' + emp.mgr.detail + '</p>' +
-          '<span class="detail-close" id="mgr-detail-' + id + '-toggle">▸ read manager notes</span>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-
-    '<div class="card"><div class="card-title">Performance Reviews — click any tile for detail</div>' +
-      '<div class="ms-grid" style="grid-template-rows:auto auto;">' + reviewTiles + '</div>' +
-      '<p class="hint">Manager-rated 1–5 at each milestone · click a tile to expand full review notes</p>' +
-    '</div>' +
-
-    '<div class="card">' +
-      '<div class="card-title">Key Insights from this hire</div>' +
-      '<div class="insight-grid">' + insightCards + '</div>' +
-    '</div>' +
-
-    '<div class="card"><div class="card-title">Employment Timeline</div>' +
-      '<div class="timeline">' + tlItems + '</div>' +
-    '</div>';
-
-  // wire up mgr notes toggle separately
-  document.getElementById('mgr-detail-' + id + '-toggle').onclick = function(e){
-    e.stopPropagation();
-    var p = document.getElementById('mgr-detail-' + id + '-text');
-    var toggle = document.getElementById('mgr-detail-' + id + '-toggle');
-    if(p.style.display === 'none'){ p.style.display = 'block'; toggle.textContent = '✕ close notes'; }
-    else { p.style.display = 'none'; toggle.textContent = '▸ read manager notes'; }
-  };
-
-  showView('employee');
-  document.querySelectorAll('.sb-link').forEach(function(l){ l.classList.remove('active'); });
-  var nav = document.getElementById('nav-e' + id);
-  if(nav) nav.classList.add('active');
-  window.scrollTo(0,0);
-}
-
-function toggleDetail(id) {
-  var el = document.getElementById(id);
-  if(!el) return;
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-/* ── INTERVIEWER DATA ── */
-var interviewers = {
-  1:{
-    initials:"RL", avatarBg:"#FEF3C7", avatarColor:"#92400E",
-    name:"Rachel Lim", title:"Senior Talent Partner", dept:"People",
-    tenure:"4 yrs at company", hiresConducted:28, avgScore:"4.4", hpRate:"46%", retention:"89%", avgTTP:"6.1 wks", mgrSat:"4.5", rating:"Top Performer",
-    ratingClass:"bp",
-    summary:"Rachel is the cohort's highest-performing interviewer across every metric. She conducts structured competency-based interviews and is known for her pre-brief discipline — she spends 20 minutes with every hiring manager before scheduling a single screen. Her 46% HP rate is nearly double the cohort average.",
-    strengths:["Strongest structured interview technique on the team — uses a consistent STAR scoring rubric for every role","Pre-briefs every hiring manager before opening a req — ensures role scope and success profile are aligned upfront","Candidates she places have the fastest average ramp time (6.1 wks) in the cohort — linked to strong expectation-setting in final interviews","Highest manager satisfaction score (4.5) — managers report her hires arrive well-prepared and accurately calibrated to the role"],
-    watchouts:["Slightly lower volume than peers — takes more time per hire, which can slow time-to-fill on urgent reqs","Primarily covers cross-functional and business roles; less experience screening deep technical roles independently"],
-    hires:[
-      {name:"Jordan Mercer", role:"Sr. Product Designer", score:"4.7", hp:true, retained:true, ttp:"5 wks"},
-      {name:"Nadia Chen", role:"HR Business Partner", score:"4.5", hp:true, retained:true, ttp:"6 wks"},
-      {name:"Priya Sethi", role:"Ops Manager", score:"4.3", hp:false, retained:true, ttp:"6.5 wks"},
-      {name:"Leon Abara", role:"Product Manager", score:"4.1", hp:false, retained:true, ttp:"7 wks"},
-      {name:"Sasha Kim", role:"Recruiting Coordinator", score:"3.9", hp:false, retained:true, ttp:"5.5 wks"}
-    ],
-    scoreBreakdown:{culture:4.7, competency:4.5, potential:4.3, fitAccuracy:4.6},
-    development:"Rachel should be considered for the interviewer calibration lead role — her rubric approach could be standardized across the team. Recommend pairing her with Devon Walsh on 2–3 technical reqs per quarter to expand her technical screening confidence.",
-    insights:[
-      {icon:"🏆",title:"#1 HP rate",desc:"46% of Rachel's hires became high performers — the highest of any interviewer and 12pp above cohort avg."},
-      {icon:"⚡",title:"Fastest ramp",desc:"Her hires average 6.1 wks to productivity — 1.5 wks faster than cohort average. Linked to role clarity work pre-hire."},
-      {icon:"📋",title:"Calibration asset",desc:"Her STAR scoring rubric is being piloted org-wide in Q2 2025 after strong results in this cohort."}
-    ]
-  },
-  2:{
-    initials:"DW", avatarBg:"#DCFCE7", avatarColor:"#14532D",
-    name:"Devon Walsh", title:"Engineering Manager, Mobile", dept:"Engineering",
-    tenure:"3 yrs at company", hiresConducted:22, avgScore:"4.2", hpRate:"41%", retention:"91%", avgTTP:"6.8 wks", mgrSat:"4.3", rating:"Strong",
-    ratingClass:"bg",
-    summary:"Devon is a strong technical interviewer with the best 1-year retention rate in the cohort at 91%. His systems design and coding exercises are well-calibrated to the role level and he consistently surfaces candidates with strong long-term growth potential, even if their immediate onboarding score is moderate.",
-    strengths:["Best retention rate in the cohort (91%) — his hires stay, thrive, and grow","Technical bar is precisely calibrated — candidates who pass his system design screen consistently outperform peers at the 90-day mark","Excellent at evaluating long-term potential vs. current ability — campus hire Taye Osei is a direct example","Post-interview feedback is detailed and actionable — recruiting team rates his debrief quality highest of any panel member"],
-    watchouts:["Occasionally over-indexes on technical depth at the expense of evaluating communication and stakeholder skills — relevant for senior ICs","Can be slow to respond to scheduling requests during active sprint cycles — creates time-to-fill friction"],
-    hires:[
-      {name:"Taye Osei", role:"Software Engineer II", score:"4.3", hp:true, retained:true, ttp:"7 wks"},
-      {name:"Amir Hassan", role:"Staff Engineer", score:"4.6", hp:true, retained:true, ttp:"5 wks"},
-      {name:"Yuki Tanaka", role:"Software Engineer I", score:"4.0", hp:false, retained:true, ttp:"8 wks"},
-      {name:"Riley Moss", role:"Engineering Manager", score:"4.2", hp:false, retained:true, ttp:"7 wks"},
-      {name:"Chris Obi", role:"Software Engineer II", score:"3.7", hp:false, retained:true, ttp:"9 wks"}
-    ],
-    scoreBreakdown:{culture:4.1, competency:4.6, potential:4.4, fitAccuracy:4.2},
-    development:"Devon should expand to interviewing product and data roles where technical rigor is valued. Recommend adding a stakeholder communication component to his interview loop to balance deep technical assessment. Consider having him lead the engineering interview calibration session in H2 2025.",
-    insights:[
-      {icon:"🔒",title:"Best retention",desc:"91% of Devon's hires are still with the company at 1 year — the highest retention rate of any interviewer."},
-      {icon:"🎯",title:"Technical precision",desc:"Candidates passing his system design screen score 0.4 pts higher at 90-day review than those who don't."},
-      {icon:"🌱",title:"Potential spotter",desc:"6 of his 22 hires were below-average at 30 days but reached HP by 1 year — highest 'late bloomer' rate."}
-    ]
-  },
-  3:{
-    initials:"KP", avatarBg:"#FCE7F3", avatarColor:"#831843",
-    name:"Keiko Park", title:"HR Director", dept:"People",
-    tenure:"6 yrs at company", hiresConducted:18, avgScore:"4.1", hpRate:"33%", retention:"83%", avgTTP:"7.2 wks", mgrSat:"4.2", rating:"Strong",
-    ratingClass:"bg",
-    summary:"Keiko is a strong interviewer for people-facing and operational roles with a particular strength in evaluating cultural alignment and leadership potential. Her HP rate of 33% is in line with the cohort average, and her retention is solid. She is most effective when paired with a technical or functional panel member.",
-    strengths:["Strongest culture and values interviewer on the team — her culture fit scores for placed hires average 4.5/5","Deep expertise in evaluating HRBP, operations, and leadership roles — rarely places a poor fit in these functions","Candidates she places report the highest satisfaction with the interview experience (4.4/5 on candidate survey)","Excellent at identifying candidates with high EQ and long-term people-leadership potential"],
-    watchouts:["Less confident assessing analytical and technical depth — relies heavily on panel partners for data and finance roles","Retention of 83% slightly below the 85% benchmark — driven by 3 separations in Q3, all in non-People functions where role brief was less clear","HP rate (33%) at cohort average — room to push the bar higher on exceptional vs. good candidates"],
-    hires:[
-      {name:"Nadia Chen", role:"HR Business Partner", score:"4.5", hp:true, retained:true, ttp:"6 wks"},
-      {name:"Dario Esposito", role:"Operations Lead", score:"4.2", hp:false, retained:true, ttp:"7 wks"},
-      {name:"Grace Liu", role:"Total Rewards Specialist", score:"4.0", hp:false, retained:true, ttp:"8 wks"},
-      {name:"Finn Reilly", role:"HRBP Associate", score:"3.8", hp:false, retained:true, ttp:"7.5 wks"},
-      {name:"Ana Sousa", role:"Recruiting Manager", score:"3.3", hp:false, retained:false, ttp:"11 wks"}
-    ],
-    scoreBreakdown:{culture:4.7, competency:3.8, potential:4.2, fitAccuracy:4.0},
-    development:"Keiko would benefit from a structured analytical evaluation framework for roles outside her core domain. Recommend co-interviewing with a data or finance leader on any non-HR role. Consider her for a formal interviewer coaching role given her candidate experience scores.",
-    insights:[
-      {icon:"❤️",title:"Culture specialist",desc:"Her hires average 4.5/5 on culture fit — the highest of any interviewer. Values alignment is her superpower."},
-      {icon:"😊",title:"Best candidate exp",desc:"4.4/5 candidate experience rating — highest on the team. Candidates feel well-informed and respected."},
-      {icon:"📌",title:"Domain boundary",desc:"All 3 of her year-1 separations were in non-People functions — a clear signal to keep her in her core domain."}
-    ]
-  },
-  4:{
-    initials:"TA", avatarBg:"#E0F2FE", avatarColor:"#0C4A6E",
-    name:"Tomás Aguilar", title:"VP of Sales", dept:"Sales",
-    tenure:"2 yrs at company", hiresConducted:20, avgScore:"3.6", hpRate:"20%", retention:"70%", avgTTP:"10.4 wks", mgrSat:"3.5", rating:"Develop",
-    ratingClass:"ba",
-    summary:"Tomás is the cohort's lowest-performing interviewer on outcome metrics. His Sales hires have the highest attrition (30% vs. 18% cohort avg), longest ramp times, and lowest HP rate. Root cause analysis points to inconsistent use of structured interview questions and over-weighting of personal rapport in hiring decisions.",
-    strengths:["Strong domain expertise — can accurately assess senior enterprise sales experience and network quality","Candidates he selects are typically well-liked culturally by the team (avg culture fit 3.8/5 is decent)","Has successfully placed 4 high-performing AEs in prior cohorts — the pattern is inconsistent, not absent"],
-    watchouts:["Does not use a structured scoring rubric — decisions are heavily gut-feel based, leading to inconsistent outcomes","Over-indexes on charisma and presentation skills vs. outbound activity track record — linked to Sofia Vasquez separation","30% attrition in his hires vs 18% cohort average — the gap is statistically significant across 2 cohorts","Avg TTP of 10.4 weeks is the highest on the team — hires frequently underestimate the role's outbound volume expectations","Manager satisfaction of 3.5 is below the 4.0 benchmark — managers report mismatch between interview impression and on-the-job reality"],
-    hires:[
-      {name:"Sofia Vasquez", role:"Account Executive", score:"3.1", hp:false, retained:false, ttp:"11 wks"},
-      {name:"Derek Pham", role:"Account Executive", score:"3.8", hp:false, retained:true, ttp:"10 wks"},
-      {name:"Lena Moore", role:"Sales Engineer", score:"4.1", hp:false, retained:true, ttp:"8 wks"},
-      {name:"Marco Silva", role:"SDR Team Lead", score:"3.4", hp:false, retained:false, ttp:"12 wks"},
-      {name:"Jade Okonkwo", role:"Enterprise AE", score:"3.2", hp:false, retained:false, ttp:"11 wks"}
-    ],
-    scoreBreakdown:{culture:3.8, competency:3.2, potential:3.5, fitAccuracy:3.1},
-    development:"Immediate priority: structured interview training and adoption of the STAR rubric Rachel Lim uses. Recommend requiring Tomás to co-interview with a Talent Partner on all Sales reqs for the next two cycles. Introduce an outbound simulation exercise (role-play cold call + pipeline review) as a mandatory gate for all AE roles. Consider whether Sales should have dedicated TA support rather than relying on the hiring manager as the primary interviewer.",
-    insights:[
-      {icon:"⚠️",title:"Highest attrition",desc:"30% of Tomás's hires left within 1 year — 12pp above the cohort average. Structured interview training is urgent."},
-      {icon:"📉",title:"Fit accuracy gap",desc:"3.1/5 fit accuracy rating — lowest on the team. Managers consistently report the hire didn't match the interview impression."},
-      {icon:"🔧",title:"Coachable pattern",desc:"His 4 best hires all came when a Talent Partner co-led the process. Structured pairing may close most of the gap."}
-    ]
-  },
-  5:{
-    initials:"BN", avatarBg:"#F3E8FF", avatarColor:"#581C87",
-    name:"Brianna Nash", title:"Talent Partner", dept:"People",
-    tenure:"1 yr at company", hiresConducted:12, avgScore:"3.8", hpRate:"25%", retention:"75%", avgTTP:"8.9 wks", mgrSat:"3.7", rating:"Develop",
-    ratingClass:"ba",
-    summary:"Brianna is in her first year as a Talent Partner and her metrics reflect a new interviewer still building calibration and structured assessment skills. Her outcomes are below benchmark but are showing a positive trend in Q3–Q4 as her technique has developed. She is considered high-potential with the right coaching investment.",
-    strengths:["Strong candidate relationship and pipeline management — fills reqs 1.2 weeks faster than team average on time-to-offer","Hires placed in Q3–Q4 (after structured training) outperform Q1–Q2 hires by 0.5 pts avg — clear improvement trajectory","High energy and candidate experience scores are strong (4.1/5) — candidates engage well and accept offers at a higher rate"],
-    watchouts:["Below-benchmark HP rate (25%) and retention (75%) — largely driven by 3 early placements before she received structured interview training","Tends to screen too quickly on enthusiasm and culture signals without probing for competency depth — working on this with her manager","9 months on the job means she has limited experience with senior or leadership-level roles — all 12 hires have been IC-level"],
-    hires:[
-      {name:"Marcus Holt", role:"Data Analyst II", score:"3.8", hp:false, retained:true, ttp:"8 wks"},
-      {name:"Priya Sethi", role:"Marketing Associate", score:"4.0", hp:false, retained:true, ttp:"7 wks"},
-      {name:"Dan Chu", role:"BDR", score:"3.5", hp:false, retained:true, ttp:"9 wks"},
-      {name:"Olivia Grant", role:"Customer Success Manager", score:"3.3", hp:false, retained:false, ttp:"10 wks"},
-      {name:"Sam Torres", role:"Data Analyst I", score:"3.2", hp:false, retained:false, ttp:"11 wks"}
-    ],
-    scoreBreakdown:{culture:4.0, competency:3.4, potential:3.6, fitAccuracy:3.5},
-    development:"Brianna is on the right trajectory. Priority actions: (1) Pair with Rachel Lim on 4 reqs per quarter as a shadow and then co-lead; (2) Enroll in the structured interview certification program in Q2 2025; (3) Hold monthly outcome reviews comparing her interview predictions to actual 30/60/90 day performance to build calibration muscle. Re-evaluate at 6-month mark — expect to move to 'Strong' rating by end of FY2025 based on current improvement curve.",
-    insights:[
-      {icon:"📈",title:"Improving trend",desc:"Q3–Q4 hires score 0.5 pts higher than Q1–Q2 hires — clear signal that training is working. Trajectory is positive."},
-      {icon:"⏩",title:"Fast to offer",desc:"Fastest time-to-offer on the team (1.2 wks below avg) — strong pipeline and candidate management skills."},
-      {icon:"🌟",title:"High potential",desc:"Flagged as high-potential by her manager. With 12 months more experience, projected to reach 'Strong' rating."}
-    ]
-  }
-};
-
-function showInterviewer(id) {
-  var iv = interviewers[id];
-  if(!iv) return;
-
-  var mgrColor = function(v){ return v >= 4.3 ? '#639922' : v >= 3.5 ? '#BA7517' : '#E24B4A'; };
-
-  var scoreBars = [
-    {label:'Culture fit accuracy', val:iv.scoreBreakdown.culture},
-    {label:'Competency assessment', val:iv.scoreBreakdown.competency},
-    {label:'Potential identification', val:iv.scoreBreakdown.potential},
-    {label:'Overall fit accuracy', val:iv.scoreBreakdown.fitAccuracy}
-  ].map(function(b){
-    return '<div class="mgr-bar"><div class="mgr-hd"><span>' + b.label + '</span><span>' + b.val.toFixed(1) + ' / 5</span></div>' +
-      '<div class="mgr-track"><div class="mgr-fill" style="width:' + (b.val/5*100).toFixed(0) + '%;background:' + mgrColor(b.val) + ';"></div></div></div>';
-  }).join('');
-
-  var strengthItems = iv.strengths.map(function(s){ return '<li>' + s + '</li>'; }).join('');
-  var watchoutItems = iv.watchouts.map(function(w){ return '<li>' + w + '</li>'; }).join('');
-
-  var hireRows = iv.hires.map(function(h){
-    var sc = parseFloat(h.score);
-    var scCls = sc >= 4.0 ? 's-hi' : sc >= 3.5 ? 's-md' : 's-lo';
-    return '<tr>' +
-      '<td style="font-weight:500;font-size:13px;">' + h.name + '</td>' +
-      '<td style="font-size:12px;color:var(--muted);">' + h.role + '</td>' +
-      '<td><span class="sp ' + scCls + '">' + h.score + '</span></td>' +
-      '<td>' + (h.hp ? '<span class="badge bp">Yes</span>' : '<span class="badge bgr">No</span>') + '</td>' +
-      '<td>' + (h.retained ? '<span class="badge bg">Active</span>' : '<span class="badge br">Separated</span>') + '</td>' +
-      '<td style="font-family:var(--mono);font-size:12px;">' + h.ttp + '</td>' +
-      '</tr>';
-  }).join('');
-
-  var insightCards = iv.insights.map(function(ins){
-    return '<div class="insight"><div class="insight-icon">' + ins.icon + '</div>' +
-      '<div class="insight-title">' + ins.title + '</div>' +
-      '<div class="insight-desc">' + ins.desc + '</div></div>';
-  }).join('');
-
-  document.getElementById('int-content').innerHTML =
-    '<div class="breadcrumb">' +
-      '<a onclick="showView(\'cohort\')">← Cohort Scorecard</a>' +
-      '<span class="sep">/</span>' +
-      '<span class="current">' + iv.name + ' — Interviewer Profile</span>' +
-    '</div>' +
-    '<div class="page-hd"><h2>' + iv.name + '</h2><p>Interviewer quality scorecard · click metrics for detail</p></div>' +
-
-    '<div class="kpi-strip">' +
-      '<div class="kpi" onclick="toggleDetail(\'id-hp' + id + '\')">' +
-        '<div class="kpi-label">HP Rate</div>' +
-        '<div class="kpi-val">' + iv.hpRate + '</div>' +
-        '<div class="kpi-delta ' + (parseInt(iv.hpRate) >= 34 ? 'up' : 'dn') + '">' + (parseInt(iv.hpRate) >= 34 ? '↑' : '↓') + ' vs 34% cohort avg</div>' +
-        '<div class="kpi-hint">▸ click for detail</div>' +
-      '</div>' +
-      '<div class="kpi" onclick="toggleDetail(\'id-ret' + id + '\')">' +
-        '<div class="kpi-label">1-Yr Retention</div>' +
-        '<div class="kpi-val">' + iv.retention + '</div>' +
-        '<div class="kpi-delta ' + (parseInt(iv.retention) >= 82 ? 'up' : 'dn') + '">' + (parseInt(iv.retention) >= 82 ? '↑' : '↓') + ' vs 82% cohort avg</div>' +
-        '<div class="kpi-hint">▸ click for detail</div>' +
-      '</div>' +
-      '<div class="kpi" onclick="toggleDetail(\'id-ttp' + id + '\')">' +
-        '<div class="kpi-label">Avg TTP</div>' +
-        '<div class="kpi-val" style="font-size:22px;">' + iv.avgTTP + '</div>' +
-        '<div class="kpi-delta ' + (parseFloat(iv.avgTTP) <= 7.6 ? 'up' : 'dn') + '">' + (parseFloat(iv.avgTTP) <= 7.6 ? '↑' : '↓') + ' vs 7.6 wk avg</div>' +
-        '<div class="kpi-hint">▸ click for detail</div>' +
-      '</div>' +
-      '<div class="kpi" onclick="toggleDetail(\'id-sat' + id + '\')">' +
-        '<div class="kpi-label">Mgr Satisfaction</div>' +
-        '<div class="kpi-val">' + iv.mgrSat + '<span style="font-size:14px;font-weight:400;color:var(--muted)">/5</span></div>' +
-        '<div class="kpi-delta ' + (parseFloat(iv.mgrSat) >= 4.1 ? 'up' : 'dn') + '">' + (parseFloat(iv.mgrSat) >= 4.1 ? '↑' : '↓') + ' vs 4.1 cohort avg</div>' +
-        '<div class="kpi-hint">▸ click for detail</div>' +
-      '</div>' +
-    '</div>' +
-
-    '<div class="detail-box" id="id-hp' + id + '" style="display:none;"><h3>📊 HP Rate — Context</h3>' +
-      '<p><strong>' + iv.hpRate + '</strong> of ' + iv.name.split(" ")[0] + '\'s hires reached high performer status (≥4.5/5 at 1-year). Cohort average is 34%.</p>' +
-      '<p>' + (parseInt(iv.hpRate) >= 34 ? 'This is above the cohort average — a signal of strong candidate quality assessment and accurate role calibration.' : 'This is below the cohort average. Review of interview scorecards suggests improvement needed in competency assessment depth.') + '</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'id-hp' + id + '\')">✕ close</span></div>' +
-
-    '<div class="detail-box" id="id-ret' + id + '" style="display:none;"><h3>📉 Retention Rate — Context</h3>' +
-      '<p><strong>' + iv.retention + '</strong> of ' + iv.name.split(" ")[0] + '\'s hires were still employed at 1 year. Cohort average is 82%.</p>' +
-      '<p>' + (parseInt(iv.retention) >= 82 ? 'Above-benchmark retention suggests hires are well-matched to role expectations and company culture — key indicators of interview quality.' : 'Below-benchmark retention indicates a gap between candidate assessment and actual role fit. Exit interview data flags role expectation mismatch as the primary driver.') + '</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'id-ret' + id + '\')">✕ close</span></div>' +
-
-    '<div class="detail-box" id="id-ttp' + id + '" style="display:none;"><h3>⏱ Time to Productivity — Context</h3>' +
-      '<p><strong>' + iv.avgTTP + '</strong> average for ' + iv.name.split(" ")[0] + '\'s hires to reach full productivity. Cohort average is 7.6 weeks.</p>' +
-      '<p>' + (parseFloat(iv.avgTTP) <= 7.6 ? 'Faster-than-average ramp time suggests this interviewer sets clear role expectations during the process and selects candidates with strong contextual readiness.' : 'Longer-than-average ramp time is often linked to misaligned expectations set during interviews or selection of candidates who need significant onboarding support.') + '</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'id-ttp' + id + '\')">✕ close</span></div>' +
-
-    '<div class="detail-box" id="id-sat' + id + '" style="display:none;"><h3>⭐ Manager Satisfaction — Context</h3>' +
-      '<p><strong>' + iv.mgrSat + '/5</strong> average manager satisfaction for ' + iv.name.split(" ")[0] + '\'s placed hires. Cohort average is 4.1/5.</p>' +
-      '<p>' + (parseFloat(iv.mgrSat) >= 4.1 ? 'Above-benchmark satisfaction scores indicate hiring managers consistently receive candidates who match the role brief they provided — a marker of thorough pre-brief and scoping discipline.' : 'Below-benchmark scores suggest a gap between what managers asked for and what was delivered. Structured pre-briefs and closer debrief loops should be prioritized.') + '</p>' +
-      '<span class="detail-close" onclick="toggleDetail(\'id-sat' + id + '\')">✕ close</span></div>' +
-
-    '<div class="prof-hd">' +
-      '<div class="prof-av" style="background:' + iv.avatarBg + ';color:' + iv.avatarColor + ';">' + iv.initials + '</div>' +
-      '<div><div class="prof-name">' + iv.name + '</div>' +
-      '<div class="prof-role">' + iv.title + ' · ' + iv.dept + '</div>' +
-      '<div class="badge-row">' +
-        '<span class="badge ' + iv.ratingClass + '">' + iv.rating + '</span>' +
-        '<span class="badge bgr">' + iv.hiresConducted + ' hires this cohort</span>' +
-        '<span class="badge bgr">' + iv.tenure + '</span>' +
-      '</div></div>' +
-    '</div>' +
-
-    '<div class="grid-2">' +
-      '<div class="card"><div class="card-title">Interview Score Breakdown</div>' + scoreBars +
-        '<p class="hint">Scores derived from: post-hire manager surveys, 1-yr performance correlation, and panel debrief quality reviews</p>' +
-      '</div>' +
-      '<div class="card"><div class="card-title">Overall Summary</div>' +
-        '<p style="font-size:13px;line-height:1.7;color:var(--text);">' + iv.summary + '</p>' +
-      '</div>' +
-    '</div>' +
-
-    '<div class="grid-2">' +
-      '<div class="card"><div class="card-title">✅ Strengths</div><ul style="padding-left:16px;font-size:13px;line-height:1.9;color:var(--text);">' + strengthItems + '</ul></div>' +
-      '<div class="card"><div class="card-title">⚠️ Watch-outs</div><ul style="padding-left:16px;font-size:13px;line-height:1.9;color:var(--text);">' + watchoutItems + '</ul></div>' +
-    '</div>' +
-
-    '<div class="card">' +
-      '<div class="card-title">Sample Hires — outcomes for selected placements</div>' +
-      '<table class="emp-table"><thead><tr><th>Name</th><th>Role</th><th>1-Yr Score</th><th>HP</th><th>Status</th><th>TTP</th></tr></thead>' +
-      '<tbody>' + hireRows + '</tbody></table>' +
-      '<p class="hint">Showing 5 representative hires · TTP = Time to Productivity · HP = High Performer (≥4.5/5 at 1-year)</p>' +
-    '</div>' +
-
-    '<div class="card"><div class="card-title">Key Insights</div>' +
-      '<div class="insight-grid">' + insightCards + '</div>' +
-    '</div>' +
-
-    '<div class="detail-box">' +
-      '<h3>📝 Development Plan</h3>' +
-      '<p>' + iv.development + '</p>' +
-    '</div>';
-
-  showView('interviewer');
-  document.querySelectorAll('.sb-link').forEach(function(l){ l.classList.remove('active'); });
-  var nav = document.getElementById('nav-i' + id);
-  if(nav) nav.classList.add('active');
-  window.scrollTo(0,0);
-}
-</script>
 </body>
 </html>
